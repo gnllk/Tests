@@ -4,53 +4,57 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 
-namespace ImageCompress
+namespace NewThumbnail
 {
-    internal class Program
+    public static class ImageHelper
     {
-        private static void Main()
-        {
-            try
-            {
-                var image = Image.FromFile("01.jpg");
-                Console.WriteLine($"Original Width: {image.Width}; Original Height: {image.Height}");
-
-                var thumbnail = ScaleImage(image, 80);
-                Console.WriteLine($"Thumb Width: {thumbnail.Width}; Thumb Height: {thumbnail.Height}");
-
-                SaveImage(thumbnail, "01.thumb.jpg");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-
-            Console.ReadKey();
-        }
-
-        private static Image ScaleImage(Image image, int targetImageWidth = 100)
+        public static Image ScaleImageWithWidth(Image image, int targetImageWidth = 100)
         {
             if (image == null)
                 throw new ArgumentException($"Invalid {nameof(image)}");
 
-            const int max64K = 1920 * 8;
-            if (targetImageWidth < 1 || targetImageWidth > max64K)
-                throw new ArgumentOutOfRangeException(nameof(targetImageWidth),
-                    $"The range of useful values for the targetImageWidth is from 1 to {max64K}");
+            var targetImageHeight = (int)Math.Round((double)image.Height / image.Width * targetImageWidth, 0);
 
-            var targetHeight = (int)Math.Round((double)image.Height / image.Width * targetImageWidth, 0);
-            var target = new Bitmap(targetImageWidth, targetHeight);
+            return ScaleImage(image, targetImageWidth, targetImageHeight);
+        }
+
+        public static Image ScaleImageWithHeight(Image image, int targetImageHeight = 100)
+        {
+            if (image == null)
+                throw new ArgumentException($"Invalid {nameof(image)}");
+
+            var targetImageWidth = (int)Math.Round((double)image.Width / image.Height * targetImageHeight, 0);
+
+            return ScaleImage(image, targetImageWidth, targetImageHeight);
+        }
+
+        public static Image ScaleImage(Image image, int targetImageWidth, int targetImageHeight)
+        {
+            if (image == null)
+                throw new ArgumentException($"Invalid {nameof(image)}");
+
+            const int maxW64K = 1920 * 8;
+            if (targetImageWidth < 1 || targetImageWidth > maxW64K)
+                throw new ArgumentOutOfRangeException(nameof(targetImageWidth),
+                    $"The range of useful values for the {nameof(targetImageWidth)} is from 1 to {maxW64K}");
+
+            const int maxH64K = 1080 * 8;
+            if (targetImageHeight < 1 || targetImageHeight > maxH64K)
+                throw new ArgumentOutOfRangeException(nameof(targetImageHeight),
+                    $"The range of useful values for the {nameof(targetImageHeight)}  is from 1 to {maxH64K}");
+
+            var target = new Bitmap(targetImageWidth, targetImageHeight);
 
             var graph = Graphics.FromImage(target);
             graph.DrawImage(image,
-                new Rectangle(0, 0, targetImageWidth, targetHeight),
+                new Rectangle(0, 0, targetImageWidth, targetImageHeight),
                 new Rectangle(0, 0, image.Width, image.Height),
                 GraphicsUnit.Pixel);
 
             return target;
         }
 
-        private static void SaveImage(Image image, string fileName, long quality = 80)
+        public static void SaveImage(Image image, string fileName, long quality = 80)
         {
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentException($"Invalid {nameof(fileName)}");
@@ -62,7 +66,7 @@ namespace ImageCompress
             }
         }
 
-        private static void SaveImage(Image image, Stream stream, string mimeType, long quality = 80)
+        public static void SaveImage(Image image, Stream stream, string mimeType, long quality = 80)
         {
             if (image == null)
                 throw new ArgumentException($"Invalid {nameof(image)}");
@@ -86,7 +90,7 @@ namespace ImageCompress
             image.Save(stream, encoderInfo, encoderParam);
         }
 
-        private static string GetImageMimeTypeFromFileName(string fileName)
+        public static string GetImageMimeTypeFromFileName(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentException($"Invalid {nameof(fileName)}");

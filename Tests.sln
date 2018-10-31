@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageCompress", "ImageCompress\ImageCompress.csproj", "{ABDB5A25-7701-4C96-9C41-84E915D28B14}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewThumbnail", "NewThumbnail\NewThumbnail.csproj", "{6669540D-A824-4458-BD0D-0006D79F0CD9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{ABDB5A25-7701-4C96-9C41-84E915D28B14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABDB5A25-7701-4C96-9C41-84E915D28B14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABDB5A25-7701-4C96-9C41-84E915D28B14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6669540D-A824-4458-BD0D-0006D79F0CD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6669540D-A824-4458-BD0D-0006D79F0CD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6669540D-A824-4458-BD0D-0006D79F0CD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6669540D-A824-4458-BD0D-0006D79F0CD9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
