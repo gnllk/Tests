@@ -52,21 +52,38 @@ namespace ImageCompress
 
         private static void SaveImage(Image image, string fileName, long quality = 80)
         {
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentException($"Invalid {nameof(fileName)}");
+
+            var mimeType = GetImageMimeTypeFromFileName(fileName);
+            using (var file = File.Create(fileName))
+            {
+                SaveImage(image, file, mimeType, quality);
+            }
+        }
+
+        private static void SaveImage(Image image, Stream stream, string mimeType, long quality = 80)
+        {
             if (image == null)
                 throw new ArgumentException($"Invalid {nameof(image)}");
 
-            if (string.IsNullOrWhiteSpace(fileName))
-                throw new ArgumentException($"Invalid {nameof(fileName)}");
+            if (null == stream || !stream.CanWrite)
+                throw new ArgumentException($"Invalid {nameof(stream)}");
+
+            if (string.IsNullOrWhiteSpace(mimeType))
+                throw new ArgumentException($"Invalid {nameof(mimeType)}");
 
             if (quality < 0 || quality > 100)
                 throw new ArgumentOutOfRangeException(nameof(quality),
                     "The range of useful values for the quality category is from 0 to 100");
 
-            var mimeType = GetImageMimeTypeFromFileName(fileName);
-            var encoderInfo = ImageCodecInfo.GetImageEncoders().First(a => a.MimeType == mimeType);
+            var encoderInfo = ImageCodecInfo.GetImageEncoders().FirstOrDefault(a => a.MimeType == mimeType);
+            if (encoderInfo == null)
+                throw new NotSupportedException($"Not support MimeType of \"{mimeType}\"");
+
             var encoderParam = new EncoderParameters { Param = new[] { new EncoderParameter(Encoder.Quality, quality) } };
 
-            image.Save(fileName, encoderInfo, encoderParam);
+            image.Save(stream, encoderInfo, encoderParam);
         }
 
         private static string GetImageMimeTypeFromFileName(string fileName)
@@ -85,7 +102,7 @@ namespace ImageCompress
                 case ".bmp": return "image/jpeg";
                 case ".png": return "image/jpeg";
                 case ".gif": return "image/jpeg";
-                default: throw new NotSupportedException($"Not support \"{extension}\"");
+                default: throw new NotSupportedException($"Not support image type of \"{extension}\"");
             }
         }
     }
