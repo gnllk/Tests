@@ -13,10 +13,10 @@ namespace ImageCompress
             try
             {
                 var image = Image.FromFile("01.jpg");
-                Console.WriteLine($"Original With: {image.Width}; Original Height: {image.Height}");
+                Console.WriteLine($"Original Width: {image.Width}; Original Height: {image.Height}");
 
                 var thumbnail = ScaleImage(image, 80);
-                Console.WriteLine($"Thumb With: {thumbnail.Width}; Thumb Height: {thumbnail.Height}");
+                Console.WriteLine($"Thumb Width: {thumbnail.Width}; Thumb Height: {thumbnail.Height}");
 
                 SaveImage(thumbnail, "01.thumb.jpg");
             }
@@ -80,6 +80,7 @@ namespace ImageCompress
 
             switch (extension.ToLowerInvariant())
             {
+                case ".jpeg":
                 case ".jpg": return "image/jpeg";
                 case ".bmp": return "image/jpeg";
                 case ".png": return "image/jpeg";
