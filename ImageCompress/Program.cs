@@ -12,13 +12,25 @@ namespace ImageCompress
         {
             try
             {
-                var image = Image.FromFile("01.jpg");
-                Console.WriteLine($"Original Width: {image.Width}; Original Height: {image.Height}");
+                using (var image = Image.FromFile("01.jpg"))
+                {
+                    Console.WriteLine($"Original Width: {image.Width}; Original Height: {image.Height}");
 
-                var thumbnail = ScaleImage(image, 80);
-                Console.WriteLine($"Thumb Width: {thumbnail.Width}; Thumb Height: {thumbnail.Height}");
+                    using (var thumbnail1 = ScaleImageWithWidth(image, 80))
+                    {
+                        Console.WriteLine($"Thumb Width: {thumbnail1.Width}; Thumb Height: {thumbnail1.Height}");
+                        SaveImage(thumbnail1, "01.thumb.jpg");
+                        SaveImage(thumbnail1, "01.thumb.bmp");
+                        SaveImage(thumbnail1, "01.thumb.png");
+                        SaveImage(thumbnail1, "01.thumb.gif");
+                    }
 
-                SaveImage(thumbnail, "01.thumb.jpg");
+                    using (var thumbnail2 = ScaleImageWithHeight(image, 80))
+                    {
+                        Console.WriteLine($"Thumb Width: {thumbnail2.Width}; Thumb Height: {thumbnail2.Height}");
+                        SaveImage(thumbnail2, "01.thumb2.jpg");
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -28,24 +40,50 @@ namespace ImageCompress
             Console.ReadKey();
         }
 
-        private static Image ScaleImage(Image image, int targetImageWidth = 100)
+        private static Image ScaleImageWithWidth(Image image, int targetImageWidth = 100)
         {
             if (image == null)
                 throw new ArgumentException($"Invalid {nameof(image)}");
 
-            const int max64K = 1920 * 8;
-            if (targetImageWidth < 1 || targetImageWidth > max64K)
+            var targetImageHeight = (int)Math.Round((double)image.Height / image.Width * targetImageWidth, 0);
+
+            return ScaleImage(image, targetImageWidth, targetImageHeight);
+        }
+
+        private static Image ScaleImageWithHeight(Image image, int targetImageHeight = 100)
+        {
+            if (image == null)
+                throw new ArgumentException($"Invalid {nameof(image)}");
+
+            var targetImageWidth = (int)Math.Round((double)image.Width / image.Height * targetImageHeight, 0);
+
+            return ScaleImage(image, targetImageWidth, targetImageHeight);
+        }
+
+        private static Image ScaleImage(Image image, int targetImageWidth, int targetImageHeight)
+        {
+            if (image == null)
+                throw new ArgumentException($"Invalid {nameof(image)}");
+
+            const int maxW64K = 1920 * 8;
+            if (targetImageWidth < 1 || targetImageWidth > maxW64K)
                 throw new ArgumentOutOfRangeException(nameof(targetImageWidth),
-                    $"The range of useful values for the targetImageWidth is from 1 to {max64K}");
+                    $"The range of useful values for the targetImageWidth is from 1 to {maxW64K}");
 
-            var targetHeight = (int)Math.Round((double)image.Height / image.Width * targetImageWidth, 0);
-            var target = new Bitmap(targetImageWidth, targetHeight);
+            const int maxH64K = 1080 * 8;
+            if (targetImageHeight < 1 || targetImageHeight > maxH64K)
+                throw new ArgumentOutOfRangeException(nameof(targetImageHeight),
+                    $"The range of useful values for the targetImageWidth is from 1 to {maxH64K}");
 
-            var graph = Graphics.FromImage(target);
-            graph.DrawImage(image,
-                new Rectangle(0, 0, targetImageWidth, targetHeight),
-                new Rectangle(0, 0, image.Width, image.Height),
-                GraphicsUnit.Pixel);
+            var target = new Bitmap(targetImageWidth, targetImageHeight);
+
+            using (var graph = Graphics.FromImage(target))
+            {
+                graph.DrawImage(image,
+                    new Rectangle(0, 0, targetImageWidth, targetImageHeight),
+                    new Rectangle(0, 0, image.Width, image.Height),
+                    GraphicsUnit.Pixel);
+            }
 
             return target;
         }
@@ -81,7 +119,14 @@ namespace ImageCompress
             if (encoderInfo == null)
                 throw new NotSupportedException($"Not support MimeType of \"{mimeType}\"");
 
-            var encoderParam = new EncoderParameters { Param = new[] { new EncoderParameter(Encoder.Quality, quality) } };
+            var encoderParam = new EncoderParameters
+            {
+                Param = new[]
+                {
+                    new EncoderParameter(Encoder.Quality, quality),
+                    //new EncoderParameter(Encoder.ColorDepth, 8L)//does not work for png
+                }
+            };
 
             image.Save(stream, encoderInfo, encoderParam);
         }
